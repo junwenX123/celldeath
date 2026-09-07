@@ -190,7 +190,7 @@ L'expérience est répétée $R$ fois. Pour une répétition $r$ :
 
 * le simulateur produit une trajectoire cachée complète ainsi que la suite des morts observées $O_{1:k}^d$ ;
 * $B_k^{\mathrm{true},(r)}$ désigne la valeur de $B_k$ calculée directement le long de cette trajectoire cachée simulée ;
-* $\widehat{m}_{k,N}^{(r)}$ désigne l'estimation fournie par le filtre particulaire à $N$ particules, qui n'utilise que $O_{1:k}^d$.
+*  \widehat{m}_{k,N}^{(r)} désigne l'estimation fournie par le filtre particulaire à $N$ particules, qui n'utilise que $O_{1:k}^d$.
 
 On compare alors la moyenne des valeurs vraies
 
