@@ -247,13 +247,6 @@ La différence est formée **répétition par répétition**, sur le même jeu d
 
 Cette comparaison est effectuée séparément pour chaque intervalle $k = 1, \ldots, 20$ et pour les trois filtres particulaires considérés.
 
-### Lecture des résultats
-
-Un biais qui décroît vers zéro lorsque $N$ augmente indique que la méthode cible bien la loi conditionnelle recherchée et que l'écart résiduel provient uniquement de l'approximation particulaire. À l'inverse, un biais qui se stabilise à une valeur non nulle malgré l'augmentation de $N$ signale que la méthode ne cible pas la loi conditionnelle correcte : l'erreur ne vient alors pas du nombre de particules mais de la construction du potentiel lui-même.
-
-Les barres d'erreur sont indispensables à cette lecture : un écart à zéro n'est interprétable que s'il est grand devant l'erreur Monte-Carlo associée.
-
----
 
 # 5. Approximation de l'intégrale spatiale
 
