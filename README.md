@@ -2,13 +2,6 @@
 
 Ce dépôt contient des codes de simulation et de validation numérique pour un modèle spatial stochastique de mort cellulaire avec :
 
-* activation de la caspase ;
-* rétroaction positive des zones actives ;
-* morts cellulaires observées ;
-* protection locale par ERK après une mort ;
-* hétérogénéité spatiale de l'intensité d'activation dans une zone fixe en forme de **T** ;
-* approximation de l'état latent par différents filtres particulaires.
-
 Le dépôt permet notamment de comparer plusieurs constructions de filtres particulaires en étudiant le biais de l'estimation d'une quantité intégrée liée à la zone dans laquelle une mort peut avoir lieu.
 
 ---
