@@ -292,7 +292,6 @@ static FilterResult filter_empirical_optimal(const Data& d, int N, int Mprop,
                 seed ^ 0xbb67ae8584caa73bULL ^
                 (uint64_t(k + 1) << 48) ^ uint64_t(i + 1)));
 
-            // Weighted reservoir sampling avoids storing all Mprop candidates.
             for (int j = 0; j < Mprop; ++j) {
                 Particle candidate = x[i];
                 std::mt19937_64 g(mix64(
