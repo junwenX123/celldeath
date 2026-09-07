@@ -43,46 +43,6 @@ Le programme considère quatre types d'événements :
 3. disparition d'un centre actif ;
 4. disparition d'une zone de protection ERK.
 
-Si $N_t^a$ désigne le nombre de centres actifs présents au temps $t$ et $N_t^p$ le nombre de zones ERK actives, le taux total utilisé par l'algorithme est
-
-$$
-a_0
-=
-\lambda_{a,1}|W|
-+
-\lambda_d|W|
-+
-N_t^a\beta_T^a
-+
-N_t^p\beta_T^d.
-$$
-
-Le temps jusqu'au prochain événement est alors simulé selon
-
-$$
-\Delta t
-\sim
-\operatorname{Exp}(a_0).
-$$
-
-Le type du prochain événement est ensuite choisi proportionnellement aux quatre taux correspondants.
-
-Le script fournit également une visualisation dynamique :
-
-* des activations acceptées ;
-* des centres actifs ;
-* des zones actives ;
-* des morts cellulaires ;
-* des zones de protection ERK ;
-* de la zone fixe en forme de T.
-
-### Exécution
-
-```bash
-python "gillespiealgo .py"
-```
-
----
 
 # 5. Simulation par rejet
 
