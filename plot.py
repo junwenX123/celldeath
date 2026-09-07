@@ -4,7 +4,7 @@ import math
 import sys
 
 results_file = sys.argv[1] if len(sys.argv) > 1 else "results.txt"
-output_file = sys.argv[2] if len(sys.argv) > 2 else "plot_all_K.png"
+output_file = sys.argv[2] if len(sys.argv) > 2 else "plot.png"
 
 df = pd.read_csv(results_file, sep=r"\s+", skiprows=1)
 
