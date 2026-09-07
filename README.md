@@ -77,12 +77,6 @@ D_t = A(V_t^a) \setminus A(V_t^p)
 
 Le script fournit également une animation du système spatial au cours du temps.
 
-### Exécution
-
-```bash
-python rejectionalgo.py
-```
-
 ---
 
 # 4. Validation des filtres particulaires
