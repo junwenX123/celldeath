@@ -354,45 +354,6 @@ $$
 
 ---
 
-# 8. Rééchantillonnage et ESS
-
-Les filtres utilisent l'**Effective Sample Size** (ESS).
-
-Pour des poids normalisés
-
-$$
-w_k^{(1)},\ldots,w_k^{(N)},
-$$
-
-l'ESS est définie par
-
-$$
-\operatorname{ESS}_k
-=
-\frac{1}{
-\displaystyle
-\sum_{i=1}^{N}
-\left(w_k^{(i)}\right)^2
-}.
-$$
-
-Dans le programme, un rééchantillonnage est effectué lorsque
-
-$$
-\operatorname{ESS}_k
-\leq
-0.75N.
-$$
-
-Après rééchantillonnage, les particules possèdent de nouveau des poids uniformes
-
-$$
-w_k^{(i)}
-=
-\frac{1}{N}.
-$$
-
----
 
 # 9. Estimation particulaire de $B_k$
 
@@ -450,42 +411,6 @@ où :
 * `K` est le nombre de morts observées utilisées dans chaque jeu de données ;
 * `GRID_SIDE` contrôle la résolution de l'approximation spatiale ;
 * `M_PROP` est le nombre de candidats utilisés par `A5_empirical_optimal`.
-
----
-
-# 11. Compilation de `validate3pf.cpp`
-
-Le programme nécessite un compilateur compatible avec **C++17**.
-
-Sous Linux, avec OpenMP :
-
-```bash
-g++ -std=c++17 -O3 -DNDEBUG -fopenmp validate3pf.cpp -o validate3pf
-```
-
-Puis :
-
-```bash
-./validate3pf
-```
-
-Les arguments facultatifs sont
-
-```text
-./validate3pf R GRID_SIDE M_PROP
-```
-
-Par exemple :
-
-```bash
-./validate3pf 500 40 20
-```
-
-Pour enregistrer directement les résultats :
-
-```bash
-./validate3pf 500 40 20 > results.txt
-```
 
 ---
 
@@ -576,8 +501,6 @@ $$
 \operatorname{paired\_MCSE}_{k,N}.
 $$
 
-L'axe horizontal est affiché en échelle logarithmique afin de faciliter la comparaison entre les différentes valeurs de $N$.
-
 ---
 
 ## Dépendances Python
@@ -595,35 +518,6 @@ Installation :
 ```bash
 pip install numpy matplotlib pandas
 ```
-
----
-
-## Exécution de `plot.py`
-
-Pour utiliser les noms de fichiers par défaut :
-
-```bash
-python plot.py
-```
-
-Le programme lit alors
-
-```text
-results.txt
-```
-
-et produit
-
-```text
-plot.png
-```
-
-Il est également possible de préciser explicitement les fichiers :
-
-```bash
-python plot.py results.txt plot.png
-```
-
 ---
 
 # 14. Résultat graphique
