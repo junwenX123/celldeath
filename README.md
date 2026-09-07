@@ -48,56 +48,26 @@ Le programme considère quatre types d'événements :
 
 ## `rejectionalgo.py`
 
-Ce fichier fournit une implémentation alternative fondée sur la **simulation par rejet**, ou **thinning**.
+Ce fichier fournit une implémentation alternative fondée sur la **simulation par rejet** (*thinning*).
 
-Pour les activations, un processus ponctuel de Poisson dominant d'intensité $\lambda_{a,1}$ est d'abord simulé sur le domaine.
+Pour les activations, un processus ponctuel de Poisson dominant d'intensité $\lambda_{a,1}$ est d'abord simulé sur le domaine. Chaque candidat situé en $x$ est ensuite accepté avec probabilité
 
-Chaque candidat situé en $x$ est ensuite accepté avec probabilité
+$$p_{\mathrm{acc}}(x) = \frac{\lambda_a\!\left(x \mid V_{t-}^a\right)}{\lambda_{a,1}}$$
 
-$$
-p_{\mathrm{acc}}(x)
-=
-\frac{\lambda_a(x\mid V_{t-}^a)}
-{\lambda_{a,1}}.
-$$
-
-Par conséquent :
+soit, explicitement,
 
 $$
-p_{\mathrm{acc}}(x)
-=
-1
-\qquad
-\text{si }
-x\in A(V_{t-}^a),
+p_{\mathrm{acc}}(x) =
+\begin{cases}
+1 & \text{si } x \in A(V_{t-}^a), \\
+\dfrac{\lambda_{a,T}}{\lambda_{a,1}} & \text{si } x \in T \setminus A(V_{t-}^a), \\
+\dfrac{\lambda_{a,c}}{\lambda_{a,1}} & \text{sinon.}
+\end{cases}
 $$
-
-$$
-p_{\mathrm{acc}}(x)
-=
-\frac{\lambda_{a,T}}{\lambda_{a,1}}
-\qquad
-\text{si }
-x\in T\setminus A(V_{t-}^a),
-$$
-
-et
-
-$$
-p_{\mathrm{acc}}(x)
-=
-\frac{\lambda_{a,c}}{\lambda_{a,1}}
-$$
-
-dans le reste du domaine.
 
 Les candidats de mort sont conservés uniquement lorsqu'ils appartiennent à
 
-$$
-D_t
-=
-A(V_t^a)\setminus A(V_t^p).
-$$
+$$D_t = A(V_t^a) \setminus A(V_t^p).$$
 
 Le script fournit également une animation du système spatial au cours du temps.
 
@@ -121,60 +91,23 @@ Ce programme C++ simule des jeux de données selon le modèle événementiel, pu
 
 Pour chaque intervalle compris entre deux morts observées successives, on considère la quantité
 
-$$
-B_k
-=
-\int_{S_{k-1}^d}^{S_k^d}
-|D_t|\,dt.
-$$
+$$B_k = \int_{S_{k-1}^d}^{S_k^d} \lvert D_t \rvert \, dt .$$
 
-Ici, $|D_t|$ désigne l'aire de la région spatiale dans laquelle une mort peut avoir lieu au temps $t$.
+Ici, $\lvert D_t \rvert$ désigne l'aire de la région spatiale dans laquelle une mort peut avoir lieu au temps $t$.
 
-Lors de la simulation des données, le programme calcule une valeur de référence
-
-$$
-B_k^{\mathrm{true}}.
-$$
-
-Les filtres particulaires produisent ensuite une approximation de la quantité conditionnelle associée à $B_k$ à partir des seules morts observées.
+Lors de la simulation des données, le programme calcule une valeur de référence $B_k^{\mathrm{true}}$. Les filtres particulaires produisent ensuite une approximation de la quantité conditionnelle associée à $B_k$ à partir des seules morts observées.
 
 ---
 
 ## 6.1. Filtre A3 — `A3_local`
 
-Le premier filtre utilise un poids fondé essentiellement sur la compatibilité spatiale à l'instant de la mort.
+Le premier filtre utilise un poids fondé essentiellement sur la compatibilité spatiale à l'instant de la mort. Pour une trajectoire particulaire compatible avec la mort observée, le poids local utilisé dans le programme est
 
-Pour une trajectoire particulaire compatible avec la mort observée, le poids local utilisé dans le programme est
+$$G_k = \frac{\mathbf{1}\!\left\{ Y_k^d \in D_{S_k^d-} \right\}}{\bigl\lvert D_{S_k^d-} \bigr\rvert}.$$
 
-$$
-G_k
-=
-\frac{
-\mathbf{1}_{\{Y_k^d\in D_{S_k^d-}\}}
-}{
-|D_{S_k^d-}|
-}.
-$$
+Si $Y_k^d \notin D_{S_k^d-}$, alors $G_k = 0$.
 
-Si
-
-$$
-Y_k^d
-\notin
-D_{S_k^d-},
-$$
-
-alors
-
-$$
-G_k=0.
-$$
-
-Dans les résultats numériques, cette méthode est appelée
-
-```text
-A3_local
-```
+Dans les résultats numériques, cette méthode est appelée `A3_local`.
 
 Cette construction utilise donc principalement l'information géométrique disponible à l'instant immédiatement antérieur à la mort observée.
 
@@ -182,237 +115,92 @@ Cette construction utilise donc principalement l'information géométrique dispo
 
 ## 6.2. Filtre A4 — `A4_full`
 
-Le deuxième filtre utilise la vraisemblance complète de l'observation sur l'intervalle.
+Le deuxième filtre utilise la vraisemblance complète de l'observation sur l'intervalle. Son potentiel est
 
-Son potentiel est
-
-$$
-G_k
-=
-\lambda_d
-\exp(-\lambda_d B_k)
-\mathbf{1}_{\{Y_k^d\in D_{S_k^d-}\}}.
-$$
+$$G_k = \lambda_d \, \exp(-\lambda_d B_k) \, \mathbf{1}\!\left\{ Y_k^d \in D_{S_k^d-} \right\}$$
 
 avec
 
-$$
-B_k
-=
-\int_{S_{k-1}^d}^{S_k^d}
-|D_t|\,dt.
-$$
+$$B_k = \int_{S_{k-1}^d}^{S_k^d} \lvert D_t \rvert \, dt .$$
 
-Le terme
+Le terme $\exp(-\lambda_d B_k)$ correspond au terme de survie sur l'intervalle $\left( S_{k-1}^d, S_k^d \right)$. Plus explicitement,
 
-$$
-\exp(-\lambda_d B_k)
-$$
+$$\exp(-\lambda_d B_k) = \exp\left( -\lambda_d \int_{S_{k-1}^d}^{S_k^d} \lvert D_t \rvert \, dt \right).$$
 
-correspond au terme de survie sur l'intervalle
-
-$$
-(S_{k-1}^d,S_k^d).
-$$
-
-Plus explicitement,
-
-$$
-\exp(-\lambda_d B_k)
-=
-\exp
-\left(
--\lambda_d
-\int_{S_{k-1}^d}^{S_k^d}
-|D_t|\,dt
-\right).
-$$
-
-Dans les résultats numériques, cette méthode est appelée
-
-```text
-A4_full
-```
+Dans les résultats numériques, cette méthode est appelée `A4_full`.
 
 Contrairement à `A3_local`, cette méthode tient donc compte de toute l'évolution de la zone de mort admissible entre deux observations successives.
 
 ---
 
-# 6.3. Filtre A5 — `A5_empirical_optimal`
+## 6.3. Filtre A5 — `A5_empirical_optimal`
 
 Le troisième filtre utilise une approximation empirique de la **proposition optimale**.
 
-Pour chaque particule parent, le programme simule
+Pour chaque particule parent, le programme simule $M_{\mathrm{prop}}$ segments latents candidats. Pour le candidat $j$, le potentiel associé à l'observation est
 
-$$
-M_{\mathrm{prop}}
-$$
+$$G_j = \lambda_d \, \exp(-\lambda_d B_j) \, \mathbf{1}\!\left\{ Y_k^d \in D_{S_k^d-}^{(j)} \right\}.$$
 
-segments latents candidats.
-
-Pour le candidat $j$, le potentiel associé à l'observation est
-
-$$
-G_j
-=
-\lambda_d
-\exp(-\lambda_d B_j)
-\mathbf{1}_{\{Y_k^d\in D_{S_k^d-}^{(j)}\}}.
-$$
-
-On dispose donc de candidats
-
-$$
-H_k^{(1)},
-H_k^{(2)},
-\ldots,
-H_k^{(M_{\mathrm{prop}})}
-$$
-
-avec leurs poids
-
-$$
-G_1,
-G_2,
-\ldots,
-G_{M_{\mathrm{prop}}}.
-$$
+On dispose donc de candidats $H_k^{(1)}, H_k^{(2)}, \ldots, H_k^{(M_{\mathrm{prop}})}$ avec leurs poids $G_1, G_2, \ldots, G_{M_{\mathrm{prop}}}$.
 
 Le candidat finalement conservé est sélectionné avec une probabilité proportionnelle à son potentiel :
 
-$$
-\mathbb{P}
-\left(
-J=j
-\mid
-G_1,\ldots,G_{M_{\mathrm{prop}}}
-\right)
-=
-\frac{G_j}
-{\displaystyle\sum_{\ell=1}^{M_{\mathrm{prop}}}G_\ell}.
-$$
+$$\mathbb{P}\left( J = j \mid G_1, \ldots, G_{M_{\mathrm{prop}}} \right) = \frac{G_j}{\displaystyle\sum_{\ell=1}^{M_{\mathrm{prop}}} G_\ell} .$$
 
-Le programme utilise pour cela un **weighted reservoir sampling**.
-
-Cette méthode permet d'effectuer cette sélection sans conserver simultanément en mémoire tous les candidats.
+Le programme utilise pour cela un **weighted reservoir sampling**. Cette méthode permet d'effectuer cette sélection sans conserver simultanément en mémoire tous les candidats.
 
 Le poids externe de la particule est estimé par
 
-$$
-\widehat{h}_k
-=
-\frac{1}{M_{\mathrm{prop}}}
-\sum_{j=1}^{M_{\mathrm{prop}}}
-G_j.
-$$
+$$\widehat{h}_k = \frac{1}{M_{\mathrm{prop}}} \sum_{j=1}^{M_{\mathrm{prop}}} G_j .$$
 
-Dans les résultats numériques, cette méthode est appelée
-
-```text
-A5_empirical_optimal
-```
+Dans les résultats numériques, cette méthode est appelée `A5_empirical_optimal`.
 
 ---
 
 # 7. Approximation de l'intégrale spatiale
 
-Le calcul exact de l'aire
+Le calcul exact de l'aire $\lvert D_t \rvert$ peut être coûteux lorsque plusieurs disques actifs et plusieurs zones ERK se chevauchent. Le programme utilise donc une grille de points dans $W$.
 
-$$
-|D_t|
-$$
+Si la grille contient $m = g^2$ points, où $g$ est le paramètre `GRID_SIDE`, et si $n_D(t)$ désigne le nombre de points appartenant à $D_t$, alors
 
-peut être coûteux lorsque plusieurs disques actifs et plusieurs zones ERK se chevauchent.
-
-Le programme utilise donc une grille de points dans $W$.
-
-Si la grille contient
-
-$$
-m
-=
-\mathrm{GRID\_SIDE}^2
-$$
-
-points et si $n_D(t)$ désigne le nombre de points appartenant à $D_t$, alors
-
-$$
-|D_t|
-\approx
-n_D(t)
-\frac{|W|}{m}.
-$$
+$$\lvert D_t \rvert \approx n_D(t) \, \frac{\lvert W \rvert}{m} .$$
 
 Cette approximation est utilisée pour calculer numériquement
 
-$$
-B_k
-=
-\int_{S_{k-1}^d}^{S_k^d}
-|D_t|\,dt.
-$$
+$$B_k = \int_{S_{k-1}^d}^{S_k^d} \lvert D_t \rvert \, dt .$$
 
 ---
 
+# 8. Estimation particulaire de $B_k$
 
-# 9. Estimation particulaire de $B_k$
-
-Pour chaque segment $k$, le filtre produit une collection de valeurs
-
-$$
-B_k^{(1)},\ldots,B_k^{(N)}
-$$
-
-associées aux particules.
+Pour chaque segment $k$, le filtre produit une collection de valeurs $B_k^{(1)}, \ldots, B_k^{(N)}$ associées aux particules.
 
 Après normalisation des poids, l'estimation particulaire utilisée est
 
-$$
-\widehat{B}_{k,N}
-=
-\sum_{i=1}^{N}
-w_k^{(i)}
-B_k^{(i)}.
-$$
+$$\widehat{B}_{k,N} = \sum_{i=1}^{N} w_k^{(i)} B_k^{(i)} .$$
 
-Cette quantité est ensuite comparée à la valeur simulée
-
-$$
-B_k^{\mathrm{true}}.
-$$
+Cette quantité est ensuite comparée à la valeur simulée $B_k^{\mathrm{true}}$.
 
 ---
 
-# 10. Expérience de Monte-Carlo
+# 9. Expérience de Monte-Carlo
 
 Le programme considère plusieurs tailles de populations particulaires :
 
-$$
-N
-\in
-\{100,250,500,1000,2000,4000\}.
-$$
+$$N \in \{100,\ 250,\ 500,\ 1000,\ 2000,\ 4000\}.$$
 
 Pour chaque valeur de $N$, l'expérience est répétée sur $R$ jeux de données simulés indépendamment.
 
 Les valeurs par défaut sont :
 
-```text
-R = 500
-K = 20
-GRID_SIDE = 40
-M_PROP = 20
-ESS threshold = 0.75
-```
-
-où :
-
-* `R` est le nombre de répétitions Monte-Carlo ;
-* `K` est le nombre de morts observées utilisées dans chaque jeu de données ;
-* `GRID_SIDE` contrôle la résolution de l'approximation spatiale ;
-* `M_PROP` est le nombre de candidats utilisés par `A5_empirical_optimal`.
-
----
+| Paramètre | Valeur | Rôle |
+| --- | --- | --- |
+| `R` | 500 | nombre de répétitions Monte-Carlo |
+| `K` | 20 | nombre de morts observées par jeu de données |
+| `GRID_SIDE` | 40 | résolution de l'approximation spatiale |
+| `M_PROP` | 20 | nombre de candidats utilisés par `A5_empirical_optimal` |
+| seuil ESS | 0.75 | seuil de rééchantillonnage |
+****
 
 # 12. Format des résultats
 
