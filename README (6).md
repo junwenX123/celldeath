@@ -1,0 +1,328 @@
+# Cell Death — Simulation et validation de filtres particulaires
+
+Ce dépôt contient des codes de simulation et de validation numérique pour un modèle spatial stochastique de mort cellulaire.
+
+Le modèle prend en compte :
+
+* l'activation latente de la caspase ;
+* une rétroaction positive des zones actives ;
+* les morts cellulaires observées ;
+* la protection locale par ERK après une mort ;
+* une hétérogénéité spatiale de l'intensité d'activation dans une zone fixe en forme de **T** ;
+* l'approximation de l'état latent par plusieurs filtres particulaires.
+
+---
+
+# 1. Structure du dépôt
+
+```text
+celldeath/
+│
+├── README.md
+├── gillespiealgo .py
+├── rejectionalgo.py
+├── validate3pf.cpp
+├── results.txt
+├── plot.py
+└── plot.png
+```
+
+Les différents fichiers correspondent à la simulation du modèle, à la validation des filtres particulaires et à la visualisation des résultats.
+
+---
+
+# 2. Simulation par algorithme de Gillespie
+
+## `gillespiealgo .py`
+
+Ce fichier implémente une simulation événementielle du modèle complet à l'aide d'un algorithme de type **Gillespie**.
+
+Le programme considère quatre types d'événements :
+
+1. proposition d'une activation ;
+2. proposition d'une mort ;
+3. disparition d'un centre actif ;
+4. disparition d'une zone de protection ERK.
+
+---
+
+# 3. Simulation par rejet
+
+## `rejectionalgo.py`
+
+Ce fichier fournit une implémentation alternative fondée sur la **simulation par rejet** (*thinning*).
+
+Pour les activations, un processus ponctuel de Poisson dominant d'intensité $\lambda_{a,1}$ est d'abord simulé sur le domaine. Chaque candidat situé en $x$ est ensuite accepté avec probabilité
+
+```math
+p_{\mathrm{acc}}(x) = \frac{\lambda_a\left(x \mid V_{t-}^a\right)}{\lambda_{a,1}}
+```
+
+soit, explicitement,
+
+```math
+p_{\mathrm{acc}}(x) =
+\begin{cases}
+1 & \text{si } x \in A(V_{t-}^a), \\
+\dfrac{\lambda_{a,T}}{\lambda_{a,1}} & \text{si } x \in T \setminus A(V_{t-}^a), \\
+\dfrac{\lambda_{a,c}}{\lambda_{a,1}} & \text{sinon.}
+\end{cases}
+```
+
+Les candidats de mort sont conservés uniquement lorsqu'ils appartiennent à
+
+```math
+D_t = A(V_t^a) \setminus A(V_t^p)
+```
+
+Le script fournit également une animation du système spatial au cours du temps.
+
+### Exécution
+
+```bash
+python rejectionalgo.py
+```
+
+---
+
+# 4. Validation des filtres particulaires
+
+## `validate3pf.cpp`
+
+Ce programme C++ simule des jeux de données selon le modèle événementiel, puis compare trois méthodes particulaires :
+
+* `A3_local` ;
+* `A4_full` ;
+* `A5_empirical_optimal`.
+
+Pour chaque intervalle compris entre deux morts observées successives, on considère la quantité
+
+```math
+B_k = \int_{S_{k-1}^d}^{S_k^d} \lvert D_t \rvert \, dt
+```
+
+Ici, $\lvert D_t \rvert$ désigne l'aire de la région spatiale dans laquelle une mort peut avoir lieu au temps $t$.
+
+Lors de la simulation des données, le programme calcule une valeur de référence $B_k^{\mathrm{true}}$. Les filtres particulaires produisent ensuite une approximation de la quantité conditionnelle associée à $B_k$ à partir des seules morts observées.
+
+---
+
+## 4.1. Filtre A3 — `A3_local`
+
+Le premier filtre utilise un poids fondé essentiellement sur la compatibilité spatiale à l'instant de la mort. Pour une trajectoire particulaire compatible avec la mort observée, le poids local utilisé dans le programme est
+
+```math
+G_k = \frac{\mathbf{1}\left\lbrace Y_k^d \in D_{S_k^d-} \right\rbrace}{\bigl\lvert D_{S_k^d-} \bigr\rvert}
+```
+
+Si $Y_k^d \notin D_{S_k^d-}$, alors $G_k = 0$.
+
+Dans les résultats numériques, cette méthode est appelée `A3_local`.
+
+Cette construction utilise donc principalement l'information géométrique disponible à l'instant immédiatement antérieur à la mort observée.
+
+---
+
+## 4.2. Filtre A4 — `A4_full`
+
+Le deuxième filtre utilise la vraisemblance complète de l'observation sur l'intervalle. Son potentiel est
+
+```math
+G_k = \lambda_d \, \exp(-\lambda_d B_k) \, \mathbf{1}\left\lbrace Y_k^d \in D_{S_k^d-} \right\rbrace
+```
+
+avec
+
+```math
+B_k = \int_{S_{k-1}^d}^{S_k^d} \lvert D_t \rvert \, dt
+```
+
+Le terme $\exp(-\lambda_d B_k)$ correspond au terme de survie sur l'intervalle $\left( S_{k-1}^d, S_k^d \right)$. Plus explicitement,
+
+```math
+\exp(-\lambda_d B_k) = \exp\left( -\lambda_d \int_{S_{k-1}^d}^{S_k^d} \lvert D_t \rvert \, dt \right)
+```
+
+Dans les résultats numériques, cette méthode est appelée `A4_full`.
+
+Contrairement à `A3_local`, cette méthode tient donc compte de toute l'évolution de la zone de mort admissible entre deux observations successives.
+
+---
+
+## 4.3. Filtre A5 — `A5_empirical_optimal`
+
+Le troisième filtre utilise une approximation empirique de la **proposition optimale**.
+
+Pour chaque particule parent, le programme simule $M_{\mathrm{prop}}$ segments latents candidats. Pour le candidat $j$, le potentiel associé à l'observation est
+
+```math
+G_j = \lambda_d \, \exp(-\lambda_d B_j) \, \mathbf{1}\left\lbrace Y_k^d \in D_{S_k^d-}^{(j)} \right\rbrace
+```
+
+On dispose donc de candidats $H_k^{(1)}, H_k^{(2)}, \ldots, H_k^{(M_{\mathrm{prop}})}$ avec leurs poids $G_1, G_2, \ldots, G_{M_{\mathrm{prop}}}$.
+
+Le candidat finalement conservé est sélectionné avec une probabilité proportionnelle à son potentiel :
+
+```math
+\mathbb{P}\left( J = j \mid G_1, \ldots, G_{M_{\mathrm{prop}}} \right)
+= \frac{G_j}{\displaystyle\sum_{\ell=1}^{M_{\mathrm{prop}}} G_\ell}
+```
+
+Le programme utilise pour cela un **weighted reservoir sampling**. Cette méthode permet d'effectuer cette sélection sans conserver simultanément en mémoire tous les candidats.
+
+Le poids externe de la particule est estimé par
+
+```math
+\widehat{h}_k = \frac{1}{M_{\mathrm{prop}}} \sum_{j=1}^{M_{\mathrm{prop}}} G_j
+```
+
+Dans les résultats numériques, cette méthode est appelée `A5_empirical_optimal`.
+
+---
+
+# 5. Approximation de l'intégrale spatiale
+
+Le calcul exact de l'aire $\lvert D_t \rvert$ peut être coûteux lorsque plusieurs disques actifs et plusieurs zones ERK se chevauchent. Le programme utilise donc une grille de points dans $W$.
+
+Si la grille contient $m = g^2$ points, où $g$ est le paramètre `GRID_SIDE`, et si $n_D(t)$ désigne le nombre de points appartenant à $D_t$, alors
+
+```math
+\lvert D_t \rvert \approx n_D(t) \, \frac{\lvert W \rvert}{m}
+```
+
+Cette approximation est utilisée pour calculer numériquement
+
+```math
+B_k = \int_{S_{k-1}^d}^{S_k^d} \lvert D_t \rvert \, dt
+```
+
+---
+
+# 6. Estimation particulaire de $B_k$
+
+Pour chaque segment $k$, le filtre produit une collection de valeurs $B_k^{(1)}, \ldots, B_k^{(N)}$ associées aux particules.
+
+Après normalisation des poids, l'estimation particulaire utilisée est
+
+```math
+\widehat{B}_{k,N} = \sum_{i=1}^{N} w_k^{(i)} B_k^{(i)}
+```
+
+Cette quantité est ensuite comparée à la valeur simulée $B_k^{\mathrm{true}}$.
+
+---
+
+# 7. Expérience de Monte-Carlo
+
+Le programme considère plusieurs tailles de populations particulaires :
+
+```math
+N \in \lbrace 100,\; 250,\; 500,\; 1000,\; 2000,\; 4000 \rbrace
+```
+
+Pour chaque valeur de $N$, l'expérience est répétée sur $R$ jeux de données simulés indépendamment.
+
+Les valeurs par défaut sont :
+
+| Paramètre | Valeur | Rôle |
+| --- | --- | --- |
+| `R` | 500 | nombre de répétitions Monte-Carlo |
+| `K` | 20 | nombre de morts observées par jeu de données |
+| `GRID_SIDE` | 40 | résolution de l'approximation spatiale |
+| `M_PROP` | 20 | nombre de candidats utilisés par `A5_empirical_optimal` |
+| seuil ESS | 0.75 | seuil de rééchantillonnage |
+
+---
+
+# 8. Format des résultats
+
+Le programme produit d'abord une ligne décrivant la configuration, par exemple :
+
+```text
+R=500  K=20  area_points=1600  ESS_threshold=0.75  M_prop=20
+```
+
+puis un tableau dont l'en-tête est
+
+```text
+N k algorithm success collapse mean_true_paired mean_PF bias abs_bias paired_MCSE
+```
+
+Les colonnes ont la signification suivante :
+
+| Colonne | Signification |
+| --- | --- |
+| `N` | nombre de particules |
+| `k` | numéro du segment |
+| `algorithm` | méthode particulaire utilisée |
+| `success` | nombre de répétitions réussies |
+| `collapse` | nombre d'effondrements du système de particules |
+| `mean_true_paired` | moyenne des valeurs vraies sur les répétitions réussies |
+| `mean_PF` | moyenne des estimations particulaires |
+| `bias` | biais moyen |
+| `abs_bias` | valeur absolue du biais |
+| `paired_MCSE` | erreur standard Monte-Carlo du biais apparié |
+
+Pour une répétition $r$, on définit l'erreur
+
+```math
+E_{r,k,N} = \widehat{B}_{r,k,N} - B_{r,k}^{\mathrm{true}}
+```
+
+Le biais empirique est alors
+
+```math
+\mathrm{Bias}_{k,N} = \frac{1}{R_{\mathrm{succ}}} \sum_{r=1}^{R_{\mathrm{succ}}} E_{r,k,N}
+```
+
+où $R_{\mathrm{succ}}$ désigne le nombre de filtres n'ayant pas subi d'effondrement.
+
+La colonne `paired_MCSE`, notée ici $\mathrm{MCSE}^{\mathrm{paired}}_{k,N}$, mesure l'erreur Monte-Carlo associée à cette estimation du biais.
+
+---
+
+# 9. Visualisation des résultats
+
+## `plot.py`
+
+Ce script lit le fichier `results.txt` et compare les trois filtres :
+
+```text
+A3_local
+A4_full
+A5_empirical_optimal
+```
+
+Pour chaque segment $k$, le graphique représente le biais $\mathrm{Bias}_{k,N}$ en fonction du nombre de particules $N$.
+
+Les barres d'erreur correspondent à $\mathrm{MCSE}^{\mathrm{paired}}_{k,N}$.
+
+---
+
+# 10. Dépendances Python
+
+Les scripts Python utilisent principalement :
+
+```text
+numpy
+matplotlib
+pandas
+```
+
+Installation :
+
+```bash
+pip install numpy matplotlib pandas
+```
+
+---
+
+# 11. Résultat graphique
+
+La figure produite par le programme est affichée directement dans ce README :
+
+![Comparaison du biais des trois filtres particulaires](plot.png)
+
+Cette figure permet de comparer, pour chaque segment $k$, le comportement des trois méthodes lorsque le nombre de particules augmente.
+
+L'objectif est notamment d'étudier si le biais se rapproche de zéro lorsque $N \longrightarrow \infty$.
