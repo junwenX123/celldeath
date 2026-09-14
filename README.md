@@ -289,19 +289,6 @@ Après normalisation des poids, l'estimation particulaire utilisée est
 
 Cette quantité est ensuite comparée à la valeur simulée $B_k^{\mathrm{true}}$.
 
-Pour la loi de filtrage post-endpoint, le nouveau programme utilise
-
-```math
-\widehat{c}_{k,N}
-=
-\sum_{i=1}^{N}w_k^{(i)}
-\left\lvert D\left(X_{S_k^d}^{+,(i)}\right)\right\rvert
-```
-
-et compare cette estimation à $C_k^{\mathrm{true}}$.
-
----
-
 # 7. Expérience de Monte-Carlo
 
 Le programme considère plusieurs tailles de populations particulaires :
