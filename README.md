@@ -249,55 +249,6 @@ Cette comparaison est effectuée séparément pour chaque intervalle $k = 1, \ld
 
 ---
 
-### Principe de validation identique à celui de $B_k$
-
-L'expérience est répétée sur $R$ jeux de données indépendants et utilise le biais apparié
-
-```math
-\widehat{\mathrm{Bias}}_{k,N}^{+}
-=
-\frac{1}{R}
-\sum_{r=1}^{R}
-\left(
-\widehat{c}_{k,N}^{(r)}
-- C_k^{\mathrm{true},(r)}
-\right)
-```
-
-Par la loi des grands nombres,
-
-```math
-\frac{1}{R}\sum_{r=1}^{R}C_k^{\mathrm{true},(r)}
-\longrightarrow
-\mathbb{E}_\theta[C_k]
-\qquad (R \to \infty)
-```
-
-et, si l'approximation particulaire est correcte, la propriété de la tour donne
-
-```math
-\mathbb{E}_\theta\left[
-\mathbb{E}_\theta(C_k\mid O_{1:k}^d)
-\right]
-=
-\mathbb{E}_\theta[C_k]
-```
-
-Les deux termes du biais visent donc la même limite, d'où
-
-```math
-\lim_{N\to\infty}\lim_{R\to\infty}
-\widehat{\mathrm{Bias}}_{k,N}^{+}
-=0
-```
-
-Comme pour $B_k$, la comparaison est effectuée répétition par répétition avant la moyenne. La colonne `paired_MCSE` quantifie l'incertitude Monte-Carlo de ce biais apparié.
-
-Lorsqu'un filtre s'effondre sur certaines répétitions, le programme remplace en pratique $R$ par le nombre de répétitions réussies $R_{\mathrm{succ}}$, exactement comme pour l'expérience fondée sur $B_k$ ; les colonnes `success` et `collapse` doivent donc être examinées avec le biais.
-
-Ce test fournit une validation numérique directe de la mise à jour post-mort, des poids et de l'intégrale de la fonctionnelle $\varphi_D$ sous $\widehat{\pi}_k^{+,N}$. Rigoureusement, un seul choix de $\varphi_D$ ne suffit pas à démontrer l'égalité de toute la mesure de filtrage pour toutes les fonctions tests ; il vérifie la composante de la loi qui est mesurée par l'aire de $D$.
-
-
 # 5. Approximation de l'intégrale spatiale
 
 Le calcul exact de l'aire $\lvert D_t \rvert$ peut être coûteux lorsque plusieurs disques actifs et plusieurs zones ERK se chevauchent. Le programme utilise donc une grille de points dans $W$.
@@ -381,12 +332,6 @@ Le programme produit d'abord une ligne décrivant la configuration, par exemple 
 R=500  K=20  area_points=1600  ESS_threshold=0.75  M_prop=20
 ```
 
-Pour `validate3pf_post_endpoint.cpp`, cette ligne contient en plus
-
-```text
-statistic=C_post=|D(X_s_k^+)|
-```
-
 puis un tableau dont l'en-tête est
 
 ```text
@@ -424,7 +369,7 @@ où $R_{\mathrm{succ}}$ (colonne `success`) désigne le nombre de répétitions 
 
 La colonne `paired_MCSE`, notée ici $\mathrm{MCSE}^{\mathrm{paired}}_{k,N}$, mesure l'erreur Monte-Carlo associée à cette estimation du biais. C'est elle qui fournit les barres d'erreur de la figure.
 
-Le fichier `results.txt` contient les résultats associés à $B_k$, tandis que `results_post_endpoint.txt` contient les résultats associés à $C_k$. Dans ce second fichier, `mean_true_paired` désigne la moyenne des $C_k^{\mathrm{true}}$ et `mean_PF` la moyenne des $\widehat{c}_{k,N}$.
+Le fichier `results.txt` contient les résultats associés à $B_k$. Dans ce second fichier, `mean_true_paired` désigne la moyenne des $C_k^{\mathrm{true}}$ et `mean_PF` la moyenne des $\widehat{c}_{k,N}$.
 
 ---
 
