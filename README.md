@@ -22,13 +22,9 @@ celldeath/
 ├── gillespiealgo .py
 ├── rejectionalgo.py
 ├── validate3pf.cpp
-├── validate3pf_post_endpoint.cpp
 ├── results.txt
-├── results_post_endpoint.txt
 ├── plot.py
-├── plot_post_endpoint.py
 ├── plot.png
-└── post_endpoint_bias.png
 ```
 
 Les différents fichiers correspondent à la simulation du modèle, à la validation des filtres particulaires et à la visualisation des résultats.
@@ -253,68 +249,6 @@ Cette comparaison est effectuée séparément pour chaque intervalle $k = 1, \ld
 
 ---
 
-## 4.5. Validation de l'état terminal après la mort
-
-### `validate3pf_post_endpoint.cpp`
-
-Le programme `validate3pf.cpp` valide une fonctionnelle du chemin caché sur le segment. Le nouveau programme `validate3pf_post_endpoint.cpp` applique le même principe à l'approximation particulaire de la loi de filtrage de l'état terminal immédiatement après la mort observée :
-
-```math
-\widehat{\pi}_k^{+,N}(dx)
-=
-\sum_{i=1}^{N} w_k^{(i)}
-\delta_{X_{S_k^d}^{+,(i)}}(dx)
-```
-
-Après le calcul et la normalisation des poids associés à la $k$-ième observation, le programme ajoute à chaque particule la zone de protection ERK déclenchée par la mort observée. Le rayon de cette zone est simulé selon la loi exponentielle du modèle. L'état obtenu est donc bien l'état $X_{S_k^d}^{+,(i)}$, immédiatement après la mise à jour due à la mort, et non l'état pré-mort $X_{S_k^d-}^{(i)}$.
-
-Pour tester cette loi, on choisit la fonctionnelle
-
-```math
-\varphi_D(x) = \lvert D(x) \rvert
-```
-
-et la statistique post-endpoint
-
-```math
-C_k = \varphi_D\left(X_{S_k^d}^{+}\right)
-= \left\lvert D\left(X_{S_k^d}^{+}\right) \right\rvert
-```
-
-Cette statistique dépend directement de l'état après la mort : l'ajout de la nouvelle zone ERK modifie la région non protégée dans laquelle une mort peut se produire.
-
-### Valeur vraie et estimation particulaire
-
-Lors de la répétition $r$, le simulateur enregistre la valeur vraie
-
-```math
-C_k^{\mathrm{true},(r)}
-=
-\varphi_D\left(X_{S_k^d}^{+,\mathrm{true},(r)}\right)
-```
-
-immédiatement après avoir ajouté la zone ERK déclenchée par la mort observée. Le filtre calcule, avec les mêmes poids normalisés que ceux de $\widehat{\pi}_k^{+,N}$,
-
-```math
-\widehat{c}_{k,N}^{(r)}
-=
-\sum_{i=1}^{N} w_k^{(i,r)}
-\varphi_D\left(X_{S_k^d}^{+,(i,r)}\right)
-=
-\int \varphi_D(x)\,\widehat{\pi}_k^{+,N,(r)}(dx)
-```
-
-Si le filtre post-endpoint et ses poids sont corrects, alors, pour une réalisation donnée des observations,
-
-```math
-\widehat{c}_{k,N}^{(r)}
-\longrightarrow
-\mathbb{E}_\theta\left[
-C_k \mid O_{1:k}^{d,(r)}
-\right]
-\qquad (N \to \infty)
-```
-
 ### Principe de validation identique à celui de $B_k$
 
 L'expérience est répétée sur $R$ jeux de données indépendants et utilise le biais apparié
@@ -510,10 +444,6 @@ Pour chaque segment $k$, le graphique représente le biais $\widehat{\mathrm{Bia
 
 Les barres d'erreur correspondent à $\mathrm{MCSE}^{\mathrm{paired}}_{k,N}$.
 
-## `plot_post_endpoint.py`
-
-Ce script lit `results_post_endpoint.txt` et trace, pour chaque mort observée $k$, le biais post-endpoint $\widehat{\mathrm{Bias}}_{k,N}^{+}$ des trois filtres, avec les barres d'erreur données par `paired_MCSE`.
-
 ### Compilation et exécution
 
 ```bash
@@ -554,8 +484,4 @@ Cette figure permet de comparer, pour chaque segment $k$, le comportement des tr
 
 L'objectif est notamment d'étudier si le biais se rapproche de zéro lorsque $N \longrightarrow \infty$.
 
-La validation de l'état terminal après la mort est représentée par la seconde figure :
 
-![Biais de la loi de filtrage post-endpoint](post_endpoint_bias.png)
-
-Cette figure applique exactement le même critère de convergence à la statistique $C_k=\lvert D(X_{S_k^d}^{+})\rvert$. Lorsque $N$ augmente, le biais de `A3_local` diminue plus lentement et reste globalement le plus important. `A4_full` réduit plus nettement ce biais, tandis que `A5_empirical_optimal` présente globalement les biais les plus faibles et la meilleure stabilité numérique parmi les trois méthodes.
