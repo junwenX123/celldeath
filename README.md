@@ -264,17 +264,6 @@ Cette approximation est utilisée pour calculer numériquement
 ```math
 B_k = \int_{S_{k-1}^d}^{S_k^d} \lvert D_t \rvert \, dt
 ```
-
-Dans l'expérience post-endpoint, la même grille est utilisée pour calculer
-
-```math
-C_k
-=
-\left\lvert D\left(X_{S_k^d}^{+}\right)\right\rvert
-\approx
-n_D\left(S_k^d+\right)\frac{\lvert W\rvert}{m}
-```
-
 ---
 
 # 6. Estimation particulaire
@@ -376,17 +365,6 @@ Pour chaque segment $k$, le graphique représente le biais $\widehat{\mathrm{Bia
 
 Les barres d'erreur correspondent à $\mathrm{MCSE}^{\mathrm{paired}}_{k,N}$.
 
-### Compilation et exécution
-
-```bash
-g++ -O3 -std=c++17 -fopenmp validate3pf_post_endpoint.cpp -o validate3pf_post_endpoint
-./validate3pf_post_endpoint 500 40 20 > results_post_endpoint.txt
-python3 plot_post_endpoint.py results_post_endpoint.txt post_endpoint_bias.png
-```
-
-Les trois arguments du programme C++ sont respectivement `R`, `GRID_SIDE` et `M_PROP`. Le script Python accepte en premier argument le fichier de résultats et en second argument le nom de l'image produite.
-
----
 
 # 10. Dépendances Python
 
