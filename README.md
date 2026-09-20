@@ -21,15 +21,15 @@ celldeath/
 ├── README.md
 ├── gillespiealgo .py
 ├── rejectionalgo.py
-├── validate3pf.cpp
+├── validate2pf.cpp
 ├── results.txt
 ├── plot.py
 ├── bias.png
-├── validate3pf_raw_path_error.cpp
+├── validate2pf_raw_path_error.cpp
 ├── plot_raw_path_error.py
 ├── results_raw_path_error.txt
 ├── raw_path_error.png
-├── validate3pf_normalized_path_error.cpp
+├── validate2pf_normalized_path_error.cpp
 ├── plot_normalized_path_error.py
 ├── results_normalized_path_error.txt
 ├── normalized_path_error.png
