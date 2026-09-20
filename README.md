@@ -165,7 +165,7 @@ Le poids externe de la particule est estimé par
 \widehat{h}_k = \frac{1}{M_{\mathrm{prop}}} \sum_{j=1}^{M_{\mathrm{prop}}} G_j
 ```
 
-Dans les résultats numériques, cette méthode est appelée `A5_empirical_optimal`.
+Dans les résultats numériques, cette méthode est appelée `empirical_optimal`.
 
 ---
 
