@@ -95,13 +95,12 @@ python rejectionalgo.py
 
 # 4. Validation des filtres particulaires
 
-## `validate3pf.cpp`
+## `validate2pf.cpp`
 
 Ce programme C++ simule des jeux de données selon le modèle événementiel, puis compare trois méthodes particulaires :
 
-* `A3_local` ;
-* `A4_full` ;
-* `A5_empirical_optimal`.
+* `bootstrap` ;
+* `empirical_optimal`.
 
 Pour chaque intervalle compris entre deux morts observées successives, on considère la quantité
 
@@ -113,25 +112,7 @@ Ici, $\lvert D_t \rvert$ désigne l'aire de la région spatiale dans laquelle un
 
 Lors de la simulation des données, le programme calcule une valeur de référence $B_k^{\mathrm{true}}$. Les filtres particulaires produisent ensuite une approximation de la quantité conditionnelle associée à $B_k$ à partir des seules morts observées.
 
----
-
-## 4.1. Filtre A3 — `A3_local`
-
-Le premier filtre utilise un poids fondé essentiellement sur la compatibilité spatiale à l'instant de la mort. Pour une trajectoire particulaire compatible avec la mort observée, le poids local utilisé dans le programme est
-
-```math
-G_k = \frac{\mathbf{1}\left\lbrace Y_k^d \in D_{S_k^d-} \right\rbrace}{\bigl\lvert D_{S_k^d-} \bigr\rvert}
-```
-
-Si $Y_k^d \notin D_{S_k^d-}$, alors $G_k = 0$.
-
-Dans les résultats numériques, cette méthode est appelée `A3_local`.
-
-Cette construction utilise donc principalement l'information géométrique disponible à l'instant immédiatement antérieur à la mort observée.
-
----
-
-## 4.2. Filtre A4 — `A4_full`
+## 4.1. Filtre — `bootstrap`
 
 Le deuxième filtre utilise la vraisemblance complète de l'observation sur l'intervalle. Son potentiel est
 
@@ -151,15 +132,15 @@ Le terme $\exp(-\lambda_d B_k)$ correspond au terme de survie sur l'intervalle $
 \exp(-\lambda_d B_k) = \exp\left( -\lambda_d \int_{S_{k-1}^d}^{S_k^d} \lvert D_t \rvert \, dt \right)
 ```
 
-Dans les résultats numériques, cette méthode est appelée `A4_full`.
+Dans les résultats numériques, cette méthode est appelée `bootstrap`.
 
-Contrairement à `A3_local`, cette méthode tient donc compte de toute l'évolution de la zone de mort admissible entre deux observations successives.
+
 
 ---
 
-## 4.3. Filtre A5 — `A5_empirical_optimal`
+## 4.3. Filtre  — `empirical_optimal`
 
-Le troisième filtre utilise une approximation empirique de la **proposition optimale**.
+Le deuxième filtre utilise une approximation empirique de la **proposition optimale**.
 
 Pour chaque particule parent, le programme simule $M_{\mathrm{prop}}$ segments latents candidats. Pour le candidat $j$, le potentiel associé à l'observation est
 
@@ -361,7 +342,7 @@ Le fichier `results.txt` contient les résultats associés à $B_k$.
 
 ## `plot.py`
 
-Ce script lit `results.txt` et affiche les courbes de `A4_full` (bootstrap, noté « boostrap » dans les images fournies) et de `A5_empirical_optimal` (empirical optimal). Pour chaque intervalle, il représente `bias` avec des barres d'erreur de ±1 `paired_MCSE`.
+Ce script lit `results.txt` et affiche les courbes de `bootstrap` et de `empirical_optimal` . Pour chaque intervalle, il représente `bias` avec des barres d'erreur de ±1 `paired_MCSE`.
 
 ## Deux autres critères de validation
 
@@ -377,7 +358,7 @@ d_k^{(i)}=\int_{S_{k-1}^d}^{S_k^d}|D_t^{(i)}\triangle D_t^{\mathrm{true}}|\,dt,
 \qquad d_k^{(i),\mathrm{norm}}=\frac{d_k^{(i)}}{(S_k^d-S_{k-1}^d)|W|}.
 ```
 
-Les scripts Python représentent ces critères pour chaque intervalle, avec leurs erreurs standard Monte-Carlo. Les figures fournies affichent les deux méthodes bootstrap et empirical optimal ; le fichier `validate3pf.cpp` joint conserve également le calcul de `A3_local`, qui n'est pas affiché dans ces figures.
+Les scripts Python représentent ces critères pour chaque intervalle, avec leurs erreurs standard Monte-Carlo. Les figures fournies affichent les deux méthodes bootstrap et empirical optimal ;
 
 Pour utiliser les noms des images ci-dessous, passer explicitement le fichier de sortie :
 
@@ -407,7 +388,7 @@ pip install numpy matplotlib pandas
 
 # 11. Résultats graphiques
 
-Les trois figures comparent le filtre bootstrap (`A4_full`, en bleu) et la proposition optimale empirique (`A5_empirical_optimal`, en orange). Chaque panneau correspond à un intervalle $k=1,\ldots,20$. L'axe du nombre de particules est logarithmique et commence à $N=100$. Les barres d'erreur représentent ±1 erreur standard Monte-Carlo, et non un intervalle de confiance à 95 %. Les moyennes portent sur les répétitions réussies ; les colonnes `success` et `collapse` doivent donc être examinées conjointement.
+Les trois figures comparent le filtre bootstrap (`bootstrap`, en bleu) et la proposition optimale empirique (`empirical_optimal`, en orange). Chaque panneau correspond à un intervalle $k=1,\ldots,20$. L'axe du nombre de particules est logarithmique et commence à $N=100$. Les barres d'erreur représentent ±1 erreur standard Monte-Carlo, et non un intervalle de confiance à 95 %. Les moyennes portent sur les répétitions réussies ; les colonnes `success` et `collapse` doivent donc être examinées conjointement.
 
 ## 11.1. Biais de l'estimation de l'aire intégrée
 
