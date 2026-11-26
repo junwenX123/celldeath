@@ -61,7 +61,7 @@ python rejectionalgo.py
 
 ## 4. Particle filter validation
 
-`validate2pf.cpp` simulates datasets from the event-driven model. The figures compare the bootstrap particle filter (`A4_full` in the output) with the empirical optimal proposal (`A5_empirical_optimal`). The bias and normalized path-error programs also report a local-weight filter (`A3_local`).
+`validate2pf.cpp` simulates datasets from the event-driven model. The figures compare the bootstrap particle filter  with the empirical optimal proposal
 
 Let $S_k^d$ and $Y_k^d$ be the time and location of the $k$th observed death, with $S_0^d=0$. Over the interval ending at $S_k^d$, the quantity of interest is the integrated area
 
